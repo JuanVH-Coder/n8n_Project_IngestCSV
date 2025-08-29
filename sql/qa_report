@@ -1,0 +1,93 @@
+-- =========================
+-- QA / Reporte para ads_spend
+-- =========================
+
+-- Métricas escalar: todo en una sola vista
+CREATE OR REPLACE TEMP VIEW qa_metrics AS
+SELECT 'stg_rows' AS metric,
+       CAST((SELECT COUNT(*) FROM _stg_ads_spend) AS VARCHAR) AS value
+UNION ALL
+SELECT 'unique_keys_in_csv',
+       CAST((
+         SELECT COUNT(*) FROM (
+           SELECT DISTINCT date, platform, account, campaign, country, device
+           FROM _stg_ads_spend
+         )
+       ) AS VARCHAR)
+UNION ALL
+SELECT 'null_date',
+       CAST((SELECT COUNT(*) FROM _stg_ads_spend WHERE date IS NULL) AS VARCHAR)
+UNION ALL
+SELECT 'null_spend',
+       CAST((SELECT COUNT(*) FROM _stg_ads_spend WHERE spend IS NULL) AS VARCHAR)
+UNION ALL
+SELECT 'null_clicks',
+       CAST((SELECT COUNT(*) FROM _stg_ads_spend WHERE clicks IS NULL) AS VARCHAR)
+UNION ALL
+SELECT 'null_impressions',
+       CAST((SELECT COUNT(*) FROM _stg_ads_spend WHERE impressions IS NULL) AS VARCHAR)
+UNION ALL
+SELECT 'null_conversions',
+       CAST((SELECT COUNT(*) FROM _stg_ads_spend WHERE conversions IS NULL) AS VARCHAR)
+UNION ALL
+SELECT 'negatives',
+       CAST((
+         SELECT COUNT(*) FROM _stg_ads_spend
+         WHERE spend < 0 OR clicks < 0 OR impressions < 0 OR conversions < 0
+       ) AS VARCHAR)
+UNION ALL
+SELECT 'min_date',
+       CAST((SELECT MIN(date) FROM _stg_ads_spend) AS VARCHAR)
+UNION ALL
+SELECT 'max_date',
+       CAST((SELECT MAX(date) FROM _stg_ads_spend) AS VARCHAR)
+UNION ALL
+SELECT 'dups_after_dedupe',
+       CAST((
+         SELECT COUNT(*) FROM (
+           SELECT 1
+           FROM ads_spend
+           GROUP BY date, platform, account, campaign, country, device
+           HAVING COUNT(*) > 1
+         )
+       ) AS VARCHAR)
+UNION ALL
+SELECT 'total_rows_final',
+       CAST((SELECT COUNT(*) FROM ads_spend) AS VARCHAR);
+
+-- (Opcional) Mostrar por stdout si corres desde CLI:
+-- SELECT * FROM qa_metrics;
+
+-- Exporta QA a CSV
+COPY (SELECT * FROM qa_metrics)
+TO 'C:/data/ads/out/qa_summary.csv' (HEADER, DELIMITER ',');
+
+-- Metadatos de carga / proveniencia
+COPY (
+  SELECT load_date, source_file_name, COUNT(*) AS rows
+  FROM ads_spend
+  GROUP BY 1,2
+  ORDER BY load_date DESC
+) TO 'C:/data/ads/out/load_metadata.csv' (HEADER, DELIMITER ',');
+
+-- Esquema de la tabla final (legible, sin arte ASCII)
+COPY (
+  SELECT column_name, data_type
+  FROM information_schema.columns
+  WHERE table_name = 'ads_spend'
+  ORDER BY ordinal_position
+) TO 'C:/data/ads/out/schema_ads_spend.csv' (HEADER, DELIMITER ',');
+
+-- Muestra 10 fechas con agregados (para el video/demo)
+COPY (
+  SELECT
+    date,
+    SUM(spend)       AS spend,
+    SUM(clicks)      AS clicks,
+    SUM(impressions) AS impressions,
+    SUM(conversions) AS conversions
+  FROM ads_spend
+  GROUP BY 1
+  ORDER BY date DESC
+  LIMIT 10
+) TO 'C:/data/ads/out/sample10.csv' (HEADER, DELIMITER ',');

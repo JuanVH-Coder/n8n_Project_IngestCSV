@@ -1,1 +1,69 @@
 
+date,platform,account,campaign,country,device,spend,clicks,impressions,conversions,load_date,source_file_name
+2025-06-30,Google,AcctA,Prospecting,MX,Mobile,445.9,288,15840,14,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-30,Meta,AcctC,Prospecting,CA,Desktop,921.99,474,16590,44,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-30,Google,AcctA,Generic_Search,BR,Desktop,1010.69,421,15998,8,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-30,Google,AcctA,Generic_Search,MX,Desktop,1350.52,605,24805,21,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-30,Google,AcctA,Retargeting,MX,Mobile,1323.61,747,50796,38,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-30,Google,AcctB,Prospecting,BR,Desktop,592.73,427,14091,13,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-30,Meta,AcctA,Generic_Search,BR,Mobile,748.76,351,20358,28,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-30,Meta,AcctC,Brand_Search,BR,Desktop,1040.62,818,47444,74,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-30,Meta,AcctC,Brand_Search,US,Mobile,1123.98,841,55506,74,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-30,Meta,AcctA,Generic_Search,US,Desktop,453.37,239,9799,9,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-30,Google,AcctC,Brand_Search,US,Mobile,501.59,263,17621,14,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-30,Meta,AcctB,Brand_Search,BR,Desktop,1341.16,556,24464,19,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-29,Meta,AcctA,Brand_Search,BR,Desktop,1318.55,897,53820,41,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-29,Google,AcctA,Prospecting,MX,Desktop,409.97,156,8736,11,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-29,Google,AcctC,Retargeting,BR,Mobile,329.69,124,3720,12,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-29,Meta,AcctB,Generic_Search,MX,Mobile,1221.23,849,41601,58,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-29,Meta,AcctC,Retargeting,MX,Mobile,738.13,381,18669,37,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-29,Meta,AcctC,Generic_Search,BR,Mobile,558.52,293,12892,19,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-29,Meta,AcctB,Prospecting,US,Desktop,389.94,126,6426,7,2025-08-27 19:51:58.634-05,ads_spend.csv
+2025-06-29,Meta,AcctB,Generic_Search,US,Mobile,998.31,756,52164,66,2025-08-27 19:51:58.634-05,ads_spend.csv
+
+cid,name,type,notnull,dflt_value,pk
+0,date,DATE,false,,false
+1,platform,VARCHAR,false,,false
+2,account,VARCHAR,false,,false
+3,campaign,VARCHAR,false,,false
+4,country,VARCHAR,false,,false
+5,device,VARCHAR,false,,false
+6,spend,DOUBLE,false,,false
+7,clicks,INTEGER,false,,false
+8,impressions,BIGINT,false,,false
+9,conversions,INTEGER,false,,false
+10,load_date,TIMESTAMP WITH TIME ZONE,false,,false
+11,source_file_name,VARCHAR,false,,false
+
+run_ts,rows_before,rows_after,inserted_rows,source_file_name
+2025-08-28 23:44:14.209,1947,1947,0,ads_spend.csv
+2025-08-28 23:38:39.449,1947,1947,0,ads_spend.csv
+2025-08-28 22:12:11.714,1947,1947,0,ads_spend.csv
+2025-08-28 22:11:21.501,1947,1947,0,ads_spend.csv
+2025-08-28 21:27:27.319,1947,1947,0,ads_spend.csv
+2025-08-28 17:51:38.514,1947,1947,0,ads_spend.csv
+2025-08-28 16:17:17.199,1947,1947,0,ads_spend.csv
+2025-08-28 01:01:23.216,1947,1947,0,ads_spend.csv
+2025-08-28 00:50:01.686,1947,1947,0,ads_spend.csv
+2025-08-28 00:00:57.141,1947,1947,0,ads_spend.csv
+2025-08-27 23:56:05.231,0,1947,1947,ads_spend.csv
+
+spend_last30,spend_prev30,spend_delta_abs,spend_delta_pct,conv_last30,conv_prev30,conv_delta_abs,conv_delta_pct,cac_last30,cac_prev30,cac_delta_abs,cac_delta_pct,roas_last30,roas_prev30,roas_delta_abs,"round(CASE  WHEN (((CASE  WHEN ((spend_prev30 > 0)) THEN (((conv_prev30 * 100) / spend_prev30)) ELSE NULL END IS NOT NULL) AND (CASE  WHEN ((spend_prev30 > 0)) THEN (((conv_prev30 * 100) / spend_prev30)) ELSE NULL END != 0))) THEN ((((CASE  WHEN ((spend_last30 > 0)) THEN (((conv_last30 * 100) / spend_last30)) ELSE NULL END - CASE  WHEN ((spend_prev30 > 0)) THEN (((conv_prev30 * 100) / spend_prev30)) ELSE NULL END) / CASE  WHEN ((spend_prev30 > 0)) THEN (((conv_prev30 * 100) / spend_prev30)) ELSE NULL END) * 100)) ELSE NULL END, 2)"
+269631.31,265869.86,3761.45,1.41,9049,8262,787,9.53,29.8,32.18,-2.38,-7.41,3.36,3.11,0.25,8.0
+
+first_load,last_load,total_rows,distinct_sources
+2025-08-27 19:51:58.634-05,2025-08-27 19:51:58.634-05,1947,1
+
+metric,value
+stg_rows,2000
+unique_keys_in_csv,1947
+null_date,0
+null_spend,0
+null_clicks,0
+null_impressions,0
+null_conversions,0
+negatives,0
+min_date,2025-01-01
+max_date,2025-06-30
+dups_after_dedupe,0
+total_rows_final,1947

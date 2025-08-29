@@ -1,0 +1,664 @@
+{
+  "name": "Ingest Ads CSV → DuckDB.",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://drive.google.com/uc?export=download&id=1ZHpj9CCXkifnmpAmiNIb8i0dnNsN1DaZ",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1160,
+        -300
+      ],
+      "id": "f37017b8-c5cd-4434-8b18-0f9d45df301b",
+      "name": "HTTP Request",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "C:\\data\\ads\\ads_spend.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -940,
+        -300
+      ],
+      "id": "c5f86f4a-1c7f-40ad-b9ab-064de6346d5f",
+      "name": "Read/Write Files from Disk",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "command": "duckdb \"C:\\data\\ads\\ads.duckdb\" -c \".read 'C:/data/ads/ingest_ads.sql'\" -c \".read 'C:/data/ads/qa_report.sql'\"\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        -300
+      ],
+      "id": "deecf330-4f52-4356-8f76-940367de5ed6",
+      "name": "Execute Command",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        100
+      ],
+      "id": "e2c57e24-1666-4853-8828-10f1f4648a03",
+      "name": "TipoVariable",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        -100
+      ],
+      "id": "e3c679fb-be7f-44b3-8853-5d8fe58f92bd",
+      "name": "FilasDeMuestra",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        -300
+      ],
+      "id": "109c5b2a-2039-44e6-ad78-f81c54f06488",
+      "name": "MetaDatos",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -520
+      ],
+      "id": "36f92de3-7fbb-41a5-954f-2f5591f46126",
+      "name": "ConsultaCSV",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "command": "duckdb \"C:\\data\\ads\\ads.duckdb\" -c \"CREATE TABLE IF NOT EXISTS ingestion_log (run_ts TIMESTAMP, rows_before BIGINT, rows_after BIGINT, inserted_rows BIGINT, source_file_name VARCHAR);\" -c \"WITH prev AS (SELECT COALESCE(MAX(rows_after),0) AS rows_before FROM ingestion_log), now AS (SELECT COUNT(*) AS rows_after, 'ads_spend.csv' AS source_file_name FROM ads_spend) INSERT INTO ingestion_log SELECT now(), prev.rows_before, now.rows_after, now.rows_after - prev.rows_before, now.source_file_name FROM prev, now;\" -c \"COPY (SELECT * FROM ingestion_log ORDER BY run_ts DESC) TO 'C:/data/ads/out/ingestion_log.csv' WITH (HEADER, DELIMITER ',');\" -c \"COPY (SELECT COUNT(*) AS rows_in_db FROM ads_spend) TO 'C:/data/ads/out/rows_in_db.csv' WITH (HEADER, DELIMITER ',');\"\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -300
+      ],
+      "id": "f43b490a-fb8c-4202-ace5-aa5c1ec9c235",
+      "name": "LOG PERSISTENCIA",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "fileSelector": "C:/data/ads/out/ingestion_log.csv",
+        "options": {
+          "dataPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -300
+      ],
+      "id": "b26f87de-5f3f-4eb5-ba1e-98d1ee8e81ec",
+      "name": "Read/Write Files from Disk5",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        420,
+        -300
+      ],
+      "id": "9701768e-7963-4ede-97a5-15d43e41461c",
+      "name": "Ver ingestion_log",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "fileSelector": "C:/data/ads/out/kpi_30d_compare.csv",
+        "options": {
+          "dataPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -20
+      ],
+      "id": "b434114f-c785-45bd-bdbb-4d95480534b4",
+      "name": "Read/Write Files from Disk6",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "command": "duckdb \"C:\\data\\ads\\ads.duckdb\" -c \".read 'C:/data/ads/kpi_30d_compare.sql'\"\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        20,
+        -20
+      ],
+      "id": "f2765ba7-d280-4c7a-aa9b-1c41751e2518",
+      "name": "CAC y ROAS",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        420,
+        -20
+      ],
+      "id": "35cbd4d4-a8eb-49bf-a7d3-89240546a2a2",
+      "name": "Ver CAC y ROAS",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// === Configuración de formato ===\nconst LOCALE   = 'en-US';    // cámbialo si quieres: 'es-MX', 'es-CO', etc.\nconst CURRENCY = 'USD';      // cámbialo si quieres\n\nconst curFmt = new Intl.NumberFormat(LOCALE, { style: 'currency', currency: CURRENCY, maximumFractionDigits: 2 });\nconst intFmt = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 });\nconst num2   = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 2 });\n\nconst cur  = n => curFmt.format(Number(n));\nconst int  = n => intFmt.format(Number(n));\nconst x    = n => `${num2.format(Number(n))}x`;\nconst pct  = n => `${Number(n).toFixed(2)}%`;\n\nconst curDelta  = n => `${Number(n) >= 0 ? '+' : '-'}${cur(Math.abs(n))}`;\nconst convDelta = n => `${Number(n) >= 0 ? '+' : '-'}${int(Math.abs(n))} conv`;\nconst xDelta    = n => `${Number(n) >= 0 ? '+' : '-'}${num2.format(Math.abs(n))}x`;\n\nconst f = $json;  // KPIs agregados del CSV (spend_last30, roas_prev30, etc.)\n\nreturn [\n  { json: {\n      metric: 'Spend ($)',\n      last30:     cur(f.spend_last30),\n      prev30:     cur(f.spend_prev30),\n      delta_abs:  curDelta(f.spend_delta_abs),\n      delta_pct:  pct(f.spend_delta_pct),\n  }},\n  { json: {\n      metric: 'Conversions (#)',\n      last30:     int(f.conv_last30),\n      prev30:     int(f.conv_prev30),\n      delta_abs:  convDelta(f.conv_delta_abs),\n      delta_pct:  pct(f.conv_delta_pct),\n  }},\n  { json: {\n      metric: 'CAC ($/conv)',\n      last30:     cur(f.cac_last30),\n      prev30:     cur(f.cac_prev30),\n      delta_abs:  curDelta(f.cac_delta_abs),\n      delta_pct:  pct(f.cac_delta_pct),\n  }},\n  { json: {\n      metric: 'ROAS (x)',\n      last30:     x(f.roas_last30),\n      prev30:     x(f.roas_prev30),\n      delta_abs:  xDelta(f.roas_delta_abs),\n      delta_pct:  pct(f.roas_delta_pct),\n  }},\n];\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        -20
+      ],
+      "id": "294d4108-9e84-4d4f-960e-b4257ab9940b",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "enableResponseOutput": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        900,
+        160
+      ],
+      "id": "d0c0aa73-ca22-45ec-8834-54dda8a979e0",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1380,
+        -300
+      ],
+      "id": "248e8b0f-d406-4178-83cf-e31753bf40a4",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Este Code recibe los 4 items de entrada y los empaqueta en 1 solo item\nreturn [\n  {\n    json: {\n      data: items.map(i => i.json)\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        160
+      ],
+      "id": "047fae1a-8a75-49a3-971a-36fd29120659",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Helpers\nconst money = (n) => (n == null ? null : `$${Number(n).toLocaleString('en-US', {maximumFractionDigits:2})}`);\nconst pct    = (n) => (n == null ? null : `${Number(n).toFixed(2)}%`);\nconst num    = (n) => (n == null ? null : Number(n));\n\n// Tomamos la única fila que sale del \"Extract from CSV\"\nconst f = items[0].json;\n\n// Armamos la tabla pedida (últimos 30 vs 30 previos + deltas)\nconst table = [\n  {\n    metric: 'CAC',\n    last30: money(f.cac_last30),\n    prev30: money(f.cac_prev30),\n    delta_abs: money(f.cac_delta_abs),\n    delta_pct: pct(f.cac_delta_pct),\n  },\n  {\n    metric: 'ROAS',\n    last30: num(f.roas_last30)?.toFixed(2),\n    prev30: num(f.roas_prev30)?.toFixed(2),\n    delta_abs: num(f.roas_delta_abs)?.toFixed(2),\n    delta_pct: pct(f.roas_delta_pct),\n  }\n];\n\n// Redacción “humana” de la comparación:\nconst msg =\n  `Comparando *últimos 30 días vs 30 días anteriores*: ` +\n  `CAC: ${money(f.cac_last30)} vs ${money(f.cac_prev30)} ` +\n  `(${money(f.cac_delta_abs)}, ${pct(f.cac_delta_pct)}). ` +\n  `ROAS: ${num(f.roas_last30)?.toFixed(2)} vs ${num(f.roas_prev30)?.toFixed(2)} ` +\n  `(${num(f.roas_delta_abs)?.toFixed(2)}, ${pct(f.roas_delta_pct)}).`;\n\nreturn [\n  {\n    json: {\n      intent: 'compare_cac_roas_30d',\n      message: msg,\n      table\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        360
+      ],
+      "id": "aefefbda-4bf5-4a83-918c-8203310dccaf",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        940,
+        360
+      ],
+      "id": "07bcdf58-1b0f-4c7f-932c-3f037c7e777b",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "path": "ads/nl",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        20,
+        380
+      ],
+      "id": "f9913be1-391c-482c-a977-f3bf772a7d38",
+      "name": "NL",
+      "webhookId": "2c468f2c-c353-4be2-9643-cbf83b5a1752"
+    },
+    {
+      "parameters": {
+        "path": "ads/kpis",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        20,
+        200
+      ],
+      "id": "8096ccf5-7662-456e-825e-495ed9d4b00a",
+      "name": "PARTE3",
+      "webhookId": "07741a1e-a2f4-478e-a47d-d3313845462e",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "GTdpOCq54xsJkp51",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "C:/data/ads/out/qa_summary.csv",
+        "options": {
+          "dataPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -500,
+        -520
+      ],
+      "id": "30ccaf9f-2c43-439f-9d49-6d6fa4a4e6ae",
+      "name": "qa_summary",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "fileSelector": "C:/data/ads/out/metadata_summary.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -500,
+        -300
+      ],
+      "id": "23d2ad20-dd5f-4778-b7eb-9570f9cdbbb1",
+      "name": "metadata_summary",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "fileSelector": "C:/data/ads/out/sample_rows.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -100
+      ],
+      "id": "68b69295-7230-4f28-8e86-1c47c5dbc679",
+      "name": "sample_rows",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "fileSelector": "C:/data/ads/out/schema_ads_spend.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -500,
+        100
+      ],
+      "id": "f2e290b7-951c-410e-8f04-5aa8522ae58d",
+      "name": "schema_ads",
+      "alwaysOutputData": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "metadata_summary",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "sample_rows",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "qa_summary",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "schema_ads",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "LOG PERSISTENCIA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FilasDeMuestra": {
+      "main": [
+        []
+      ]
+    },
+    "LOG PERSISTENCIA": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk5",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "CAC y ROAS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk5": {
+      "main": [
+        [
+          {
+            "node": "Ver ingestion_log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk6": {
+      "main": [
+        [
+          {
+            "node": "Ver CAC y ROAS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CAC y ROAS": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ver CAC y ROAS": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        []
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NL": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PARTE3": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "qa_summary": {
+      "main": [
+        [
+          {
+            "node": "ConsultaCSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "metadata_summary": {
+      "main": [
+        [
+          {
+            "node": "MetaDatos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sample_rows": {
+      "main": [
+        [
+          {
+            "node": "FilasDeMuestra",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "schema_ads": {
+      "main": [
+        [
+          {
+            "node": "TipoVariable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
+  },
+  "versionId": "ff7ba0ea-7df1-4bec-815a-48fc30f96709",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4d7a1933c63c5a60320ab6c2432c05b153da2f5ba9e63426ee4e6652e1af939"
+  },
+  "id": "Uf6jsiDQ16r9ZTeK",
+  "tags": [
+    {
+      "name": "ingestion",
+      "id": "FvXATyfJeXPzypYH",
+      "createdAt": "2025-08-28T01:58:25.491Z",
+      "updatedAt": "2025-08-28T01:58:25.491Z"
+    },
+    {
+      "name": "DuckDB",
+      "id": "J1TZsX5Emnx71zga",
+      "createdAt": "2025-08-27T22:44:41.617Z",
+      "updatedAt": "2025-08-27T22:44:41.617Z"
+    },
+    {
+      "name": "qa",
+      "id": "va1D7i39ISWqxxnm",
+      "createdAt": "2025-08-28T01:58:31.210Z",
+      "updatedAt": "2025-08-28T01:58:31.210Z"
+    }
+  ]
+}

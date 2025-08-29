@@ -1,0 +1,11 @@
+# Bases y binarios grandes
+*.duckdb
+*.parquet
+
+# Salidas locales completas
+out/
+archive/
+
+# Archivos temporales
+*.tmp
+*.log

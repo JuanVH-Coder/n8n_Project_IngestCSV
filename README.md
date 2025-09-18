@@ -257,4 +257,4 @@ http://localhost:5678/webhook-test/ads/nl
 
 MIT — ver LICENSE.
 
-Si algo no te corre igual, casi siempre es por ruta de archivos, permisos o divisiones por cero. Con eso resuelto, debería funcionar de punta a punta.
+
